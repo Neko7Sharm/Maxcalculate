@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="th" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคิดเลขสัดส่วน | Proportional Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-thai@latest/thai-400-normal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-thai@latest/thai-700-normal.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        thai: ['"Noto Sans Thai"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen transition-all duration-500">
+    <!-- Background -->
+    <div id="bg" class="fixed inset-0 gradient-bg-light transition-all duration-500 -z-10"></div>
+
+    <!-- Floating shapes -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-5">
+        <div class="floating-shape w-64 h-64 bg-white top-10 -left-20" style="animation-delay: 0s;"></div>
+        <div class="floating-shape w-48 h-48 bg-white top-1/2 right-10" style="animation-delay: 2s;"></div>
+        <div class="floating-shape w-32 h-32 bg-white bottom-20 left-1/3" style="animation-delay: 4s;"></div>
+    </div>
+
+    <div class="min-h-screen flex flex-col items-center justify-start px-4 py-6 md:py-10">
+        
+        <!-- Header -->
+        <div class="w-full max-w-2xl flex items-center justify-between mb-6 animate-fade-in-up">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-xl md:text-2xl">
+                    ⚖️
+                </div>
+                <div>
+                    <h1 class="text-white text-lg md:text-xl font-bold leading-tight">เครื่องคิดเลขสัดส่วน</h1>
+                    <p class="text-white/70 text-xs md:text-sm">Proportional Calculator</p>
+                </div>
+            </div>
+
+            <!-- Dark Mode Toggle -->
+            <button id="themeToggle" onclick="toggleTheme()" class="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-2 hover:bg-white/30 transition-all duration-300">
+                <span id="themeIcon" class="text-lg">☀️</span>
+                <div id="toggleTrack" class="w-11 h-6 rounded-full toggle-track-light relative transition-all duration-300">
+                    <div id="toggleKnob" class="toggle-knob w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 shadow-md"></div>
+                </div>
+                <span id="themeLabel" class="text-white/80 text-xs hidden sm:inline">สว่าง</span>
+            </button>
+        </div>
+
+        <!-- Main Card -->
+        <div id="mainCard" class="w-full max-w-2xl card-light rounded-3xl shadow-2xl p-6 md:p-8 animate-fade-in-up transition-all duration-500" style="animation-delay: 0.1s;">
+            
+            <!-- Formula explanation -->
+            <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-100 dark:border-indigo-800/30">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl mt-0.5">💡</span>
+                    <div>
+                        <p class="text-sm font-bold text-gray-700 dark:text-gray-200">วิธีใช้งาน</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                            คำนวณสัดส่วน: ถ้า <span class="font-bold text-indigo-600 dark:text-indigo-400">A</span> เต็ม <span class="font-bold text-indigo-600 dark:text-indigo-400">B</span> แล้ว <span class="font-bold text-purple-600 dark:text-purple-400">C</span> จะเต็ม <span class="font-bold text-purple-600 dark:text-purple-400">เท่าไหร่?</span>
+                        </p>
+                        <div class="mt-2 text-center">
+                            <span class="inline-block bg-white dark:bg-gray-800 rounded-lg px-3 py-1 text-xs font-mono text-gray-600 dark:text-gray-300 shadow-sm">
+                                ผลลัพธ์ = (C ÷ A) × B
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Fields -->
+            <div class="space-y-4">
+                <!-- Input 1: ค่าเต็มต้น (A) -->
+                <div class="group">
+                    <label class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">A</span>
+                        ค่าเต็มต้น (Base Max)
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="inputA" placeholder="เช่น 360"
+                            class="input-light dark:input-dark w-full px-4 py-3.5 rounded-xl text-lg font-semibold outline-none transition-all duration-300 placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                            oninput="autoCalculate()">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">ต้น</div>
+                    </div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-1">ค่าสูงสุดของระบบเดิม</p>
+                </div>
+
+                <!-- Arrow divider -->
+                <div class="flex justify-center">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                    </div>
+                </div>
+
+                <!-- Input 2: ค่าเต็มที่ต้องการ (B) -->
+                <div class="group">
+                    <label class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+                        <span class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-bold">B</span>
+                        ค่าเต็มที่ต้องการ (Target Max)
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="inputB" placeholder="เช่น 512"
+                            class="input-light dark:input-dark w-full px-4 py-3.5 rounded-xl text-lg font-semibold outline-none transition-all duration-300 placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                            oninput="autoCalculate()">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">เป้า</div>
+                    </div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-1">ค่าสูงสุดของระบบใหม่ที่ต้องการแปลง</p>
+                </div>
+
+                <!-- Arrow divider -->
+                <div class="flex justify-center">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                    </div>
+                </div>
+
+                <!-- Input 3: ค่าที่อยากหา (C) -->
+                <div class="group">
+                    <label class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+                        <span class="w-7 h-7 rounded-lg bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 flex items-center justify-center text-xs font-bold">C</span>
+                        ค่าที่อยากหา (Value)
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="inputC" placeholder="เช่น 36"
+                            class="input-light dark:input-dark w-full px-4 py-3.5 rounded-xl text-lg font-semibold outline-none transition-all duration-300 placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                            oninput="autoCalculate()">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">ค่า</div>
+                    </div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-1">ค่าที่ต้องการแปลงไประบบใหม่</p>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 mt-6">
+                <button onclick="calculate()" class="btn-calculate flex-1 text-white font-bold py-3.5 rounded-xl text-base shadow-lg flex items-center justify-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="10" y2="10"></line><line x1="12" y1="10" x2="14" y2="10"></line><line x1="8" y1="14" x2="10" y2="14"></line><line x1="12" y1="14" x2="14" y2="14"></line><line x1="8" y1="18" x2="14" y2="18"></line></svg>
+                    คำนวณ
+                </button>
+                <button onclick="resetAll()" class="btn-reset px-5 py-3.5 rounded-xl text-sm font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                    ล้าง
+                </button>
+            </div>
+
+            <!-- Result -->
+            <div id="resultBox" class="mt-6 hidden">
+                <div class="result-box-light dark:result-box-dark rounded-2xl p-5 transition-all duration-500">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-bold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            ผลลัพธ์
+                        </span>
+                        <button onclick="copyResult()" class="text-xs text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors" id="copyBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            คัดลอก
+                        </button>
+                    </div>
+                    <div class="text-center">
+                        <div id="resultValue" class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent animate-number-pop">
+                            0
+                        </div>
+                        <div id="resultDescription" class="text-sm text-gray-500 dark:text-gray-400 mt-2"></div>
+                    </div>
+
+                    <!-- Visual bar -->
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-400 dark:text-gray-500 mb-1">
+                            <span>0</span>
+                            <span id="barMax">100%</span>
+                        </div>
+                        <div class="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 dark:text-gray-500 mt-1">
+                            <span id="percentText">0%</span>
+                            <span>ของค่าเต็ม</span>
+                        </div>
+                    </div>
+
+                    <!-- Calculation breakdown -->
+                    <div id="breakdown" class="mt-4 p-3 rounded-xl bg-white/50 dark:bg-black/20 text-xs font-mono text-gray-500 dark:text-gray-400 text-center">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error message -->
+            <div id="errorBox" class="mt-4 hidden">
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-4 flex items-center gap-3">
+                    <span class="text-xl">⚠️</span>
+                    <p id="errorText" class="text-sm text-red-600 dark:text-red-400"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div id="historySection" class="w-full max-w-2xl mt-6 animate-fade-in-up hidden" style="animation-delay: 0.2s;">
+            <div id="historyCard" class="card-light dark:card-dark rounded-2xl shadow-xl p-5 transition-all duration-500">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        📋 ประวัติการคำนวณ
+                    </h3>
+                    <button onclick="clearHistory()" class="text-xs text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors">ล้างทั้งหมด</button>
+                </div>
+                <div id="historyList" class="space-y-2 max-h-48 overflow-y-auto">
+                </div>
+            </div>
+        </div>
+
+        <!-- My Presets Section -->
+        <div class="w-full max-w-2xl mt-6 animate-fade-in-up" style="animation-delay: 0.3s;">
+            <div id="presetsCard" class="card-light dark:card-dark rounded-2xl shadow-xl p-5 transition-all duration-500">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-base font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        📂 หมวดหมู่ของฉัน
+                        <span id="presetCount" class="text-xs font-normal text-gray-400 dark:text-gray-500">(0 รายการ)</span>
+                    </h3>
+                    <button onclick="openAddPresetModal()" class="btn-calculate text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-md">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        เพิ่ม
+                    </button>
+                </div>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">
+                    💡 บันทึกแค่ Base Max และ Target Max ไว้ ส่วนค่าที่หาจะใส่เองทีหลัง
+                </p>
+
+                <!-- Empty state -->
+                <div id="presetsEmpty" class="text-center py-8 hidden">
+                    <div class="text-5xl mb-3">📭</div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-bold">ยังไม่มีรายการที่บันทึกไว้</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">กดปุ่ม "เพิ่ม" เพื่อบันทึกรายการโปรดของคุณ</p>
+                </div>
+
+                <!-- Presets grid -->
+                <div id="presetsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-white/60 text-xs animate-fade-in-up" style="animation-delay: 0.4s;">
+            <p>สร้างด้วย ❤️ | Proportional Calculator v2.2</p>
+        </div>
+    </div>
+
+    <!-- Add/Edit Preset Modal -->
+    <div id="presetModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-md animate-modal-in max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between mb-5">
+                    <h3 id="modalTitle" class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        ➕ เพิ่มรายการใหม่
+                    </h3>
+                    <button onclick="closePresetModal()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 dark:text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                <!-- Icon Picker -->
+                <div class="mb-5">
+                    <label class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 block flex items-center gap-2">
+                        🎨 เลือกไอคอน
+                    </label>
+                    <div class="grid grid-cols-8 gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl max-h-40 overflow-y-auto" id="emojiGrid">
+                    </div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5 ml-1">เลือกไอคอนที่ต้องการแสดง</p>
+                </div>
+
+                <!-- Preset Name -->
+                <div class="mb-4">
+                    <label class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 block">
+                        📝 ชื่อรายการ
+                    </label>
+                    <input type="text" id="presetName" placeholder="เช่น ค่าสี RGB, องศาเกม" maxlength="30"
+                        class="input-light dark:input-dark w-full px-4 py-3 rounded-xl text-sm font-semibold outline-none transition-all duration-300 placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                </div>
+
+                <!-- Values: A and B only -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1.5 block flex items-center gap-1">
+                            <span class="w-5 h-5 rounded bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-[10px]">A</span>
+                            Base Max
+                        </label>
+                        <input type="number" id="presetA" placeholder="360"
+                            class="input-light dark:input-dark w-full px-3 py-2.5 rounded-xl text-sm font-semibold outline-none transition-all duration-300 placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                        <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 ml-1">ค่าเต็มต้น</p>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-purple-600 dark:text-purple-400 mb-1.5 block flex items-center gap-1">
+                            <span class="w-5 h-5 rounded bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-[10px]">B</span>
+                            Target Max
+                        </label>
+                        <input type="number" id="presetB" placeholder="512"
+                            class="input-light dark:input-dark w-full px-3 py-2.5 rounded-xl text-sm font-semibold outline-none transition-all duration-300 placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                        <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 ml-1">ค่าเต็มเป้าหมาย</p>
+                    </div>
+                </div>
+
+                <!-- Info note -->
+                <div class="mb-5 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
+                    <div class="flex items-start gap-2">
+                        <span class="text-base">ℹ️</span>
+                        <p class="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                            <span class="font-bold">หมายเหตุ:</span> ไม่ต้องใส่ค่า C ที่นี่ เพราะเป็นค่าที่จะใส่เองในภายหลังตอนใช้งานจริง
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div id="presetPreview" class="mb-5 p-3 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-100 dark:border-indigo-800/30 hidden">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">ตัวอย่างที่จะแสดง:</p>
+                    <div class="flex items-center gap-3">
+                        <span id="previewIcon" class="text-2xl"></span>
+                        <div class="flex-1 min-w-0">
+                            <p id="previewName" class="text-sm font-bold text-gray-700 dark:text-gray-200 truncate"></p>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span id="previewA" class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400"></span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="arrow-flow"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                <span id="previewB" class="text-xs font-mono font-bold text-purple-600 dark:text-purple-400"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error -->
+                <div id="presetError" class="mb-4 hidden">
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-3 flex items-center gap-2">
+                        <span class="text-sm">⚠️</span>
+                        <p id="presetErrorText" class="text-xs text-red-600 dark:text-red-400"></p>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="closePresetModal()" class="flex-1 px-4 py-3 rounded-xl text-sm font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        ยกเลิก
+                    </button>
+                    <button onclick="savePreset()" class="btn-calculate flex-1 text-white font-bold py-3 rounded-xl text-sm shadow-lg flex items-center justify-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        <span id="saveBtnText">บันทึกรายการ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm animate-modal-in p-6">
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">ลบรายการนี้?</h3>
+                <p id="deleteItemName" class="text-sm text-gray-500 dark:text-gray-400 mb-5"></p>
+                <div class="flex gap-3">
+                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        ยกเลิก
+                    </button>
+                    <button onclick="confirmDelete()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold bg-red-500 hover:bg-red-600 text-white transition-colors shadow-lg">
+                        ลบ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
